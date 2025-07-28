@@ -14,7 +14,7 @@
 </div>
 
 ## Overview
-Jumpdrive is a slim, minimally-featured library to statically serve a directory over HTTP. Additionally, one or more `GET` endpoints and a WebSocket (RFC 6455) connection are supported.
+Jumpdrive is a slim, minimally-featured library to statically serve a directory over HTTP. In addition, handling of one or more `GET` endpoints and a WebSocket (RFC 6455) connection is supported.
 
 ## Usage
 Jumpdrive executes its event loop via the titular `jumpdrive!` macro, and provides various helper functions to assist endpoint handlers.
