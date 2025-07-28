@@ -1,9 +1,9 @@
 <div align="center">
     <h1><code>jumpdrive</code></h1>
-    <a href="https://github.com/UBC-iGEM/jumpdrive">
+    <a href="https://github.com/UBC-iGEM/jumpdrive" style="text-decoration: none;">
         <img alt="github" src="https://img.shields.io/badge/UBC--iGEM-jumpdrive-8da0cb?style=for-the-badge&labelColor=555555&logo=github">
     </a>
-    <a href="https://jumpdrive.vercel.app/jumpdrive/">
+    <a href="https://jumpdrive.vercel.app/jumpdrive/" style="text-decoration: none;">
         <img alt="github" src="https://img.shields.io/github/deployments/UBC-iGEM/jumpdrive/production?&style=for-the-badge&labelColor=555555&logo=vercel">
     </a>
     <br/>
