@@ -94,6 +94,18 @@ impl Parse for PathItem {
     }
 }
 
+/// The primary entrypoint for Jumpdrive.
+/// ## Example:
+/// ```rust
+/// jumpdrive! {
+///     dir = "public/",
+///     ws = ["/ws", ws_handler],
+///     routes = {
+///         "/csv": csv_server
+///     },
+///     err = err_callback
+/// }
+/// ```
 #[proc_macro]
 #[proc_macro_error]
 pub fn jumpdrive(input: TokenStream) -> TokenStream {
@@ -137,16 +149,16 @@ pub fn jumpdrive(input: TokenStream) -> TokenStream {
     let error_handler = macro_input.error_handler;
 
     quote! {
-        ::jumpdrive::Jumpdrive {
-            map: ::phf::phf_map! {
+        ::jumpdrive::Jumpdrive::new(
+            ::phf::phf_map! {
                 #(#stripped_paths => (include_bytes!(#absolute_paths), #mime_type)),*
             },
-            socket: #socket_arg,
-            other_paths: ::phf::phf_map! {
+            #socket_arg,
+            ::phf::phf_map! {
                 #(#path_arg => #path_handler),*
             },
-            error_handler: #error_handler,
-        }.serve()
+            #error_handler,
+        ).serve()
     }
     .into()
 }

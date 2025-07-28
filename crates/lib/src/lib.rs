@@ -2,25 +2,48 @@ use phf::Map;
 use std::{
     env,
     error::Error,
-    io::Write,
+    io::{self, Write},
     net::{TcpListener, TcpStream},
     sync::Arc,
     thread,
 };
 use tungstenite::{WebSocket, accept};
 
+pub use proc::jumpdrive;
+
+/// The internal representation of a Jumpdrive process.\
+/// **Note**: this type should never be constructed directly.
+/// Instead, use the `jumpdrive!` macro.
 #[derive(Debug)]
 pub struct Jumpdrive {
-    pub map: Map<&'static str, (&'static [u8], &'static str)>,
-    pub socket: Option<Socket>,
-    pub other_paths: Map<&'static str, fn(&mut TcpStream)>,
-    pub error_handler: fn(String),
+    map: Map<&'static str, (&'static [u8], &'static str)>,
+    socket: Option<Socket>,
+    other_paths: Map<&'static str, fn(&mut TcpStream)>,
+    error_handler: fn(String),
 }
 type Socket = (&'static str, fn(&mut WebSocket<TcpStream>));
 
-pub type JumpdriveResult = Result<(), Box<dyn Error>>;
+/// A specialized Result type for the `jumpdrive!` macro.
+/// # Returns
+/// - Err if binding to a TcpListener fails on the requested IP and PORT
+/// - Should never realistically return otherwise
+pub type JumpdriveResult = io::Result<()>;
 
 impl Jumpdrive {
+    pub fn new(
+        map: Map<&'static str, (&'static [u8], &'static str)>,
+        socket: Option<Socket>,
+        other_paths: Map<&'static str, fn(&mut TcpStream)>,
+        error_handler: fn(String),
+    ) -> Self {
+        Self {
+            map,
+            socket,
+            other_paths,
+            error_handler,
+        }
+    }
+
     pub fn serve(self) -> JumpdriveResult {
         let config = Arc::new(self);
         let ip = env::var("IP").unwrap_or("127.0.0.1".to_string());

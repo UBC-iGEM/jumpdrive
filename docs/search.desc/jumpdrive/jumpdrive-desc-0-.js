@@ -1,0 +1,1 @@
+searchState.loadedDescShard("jumpdrive", 0, "Contains the error value\nThe internal representation of a Jumpdrive process. <strong>Note</strong>: …\nA specialized Result type for the <code>jumpdrive!</code> macro.\nContains the success value\nReturns the argument unchanged.\nCalls <code>U::from(self)</code>.\nThe primary entrypoint for Jumpdrive.")
