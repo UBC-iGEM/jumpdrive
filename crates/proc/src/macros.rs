@@ -1,10 +1,9 @@
-#![feature(proc_macro_span)]
 use proc_macro::{Span, TokenStream};
 use proc_macro_error::{abort, proc_macro_error};
-use proc_macro2::Span as Span2;
 use quote::quote;
 use std::{
     collections::HashSet,
+    env,
     fmt::Display,
     io,
     ops::Not,
@@ -99,9 +98,7 @@ impl Parse for PathItem {
 #[proc_macro_error]
 pub fn jumpdrive(input: TokenStream) -> TokenStream {
     let macro_input = parse_macro_input!(input as MacroInput);
-    let dir_site = macro_input.map_dir.span();
-    let (mut path_map, (stripped_paths, absolute_paths)) =
-        serve_paths(macro_input.map_dir, dir_site, Span::call_site());
+    let (mut path_map, (stripped_paths, absolute_paths)) = serve_paths(macro_input.map_dir);
     let mime_type: Vec<_> = stripped_paths
         .iter()
         .map(|v| {
@@ -117,8 +114,7 @@ pub fn jumpdrive(input: TokenStream) -> TokenStream {
         .collect();
 
     if let Some((ref socket_path, _)) = macro_input.socket {
-        handle_additional_path(socket_path, &mut path_map)
-            .unwrap_or_else(|(e_str, e_span)| abort!(e_span, e_str));
+        handle_additional_path(socket_path, &mut path_map);
     }
     let socket_arg = match macro_input.socket {
         Some((socket_path, socket_handler)) => quote!(Some((#socket_path, #socket_handler))),
@@ -129,8 +125,7 @@ pub fn jumpdrive(input: TokenStream) -> TokenStream {
         .other_paths
         .iter()
         .for_each(|PathItem(p_lit, _)| {
-            handle_additional_path(p_lit, &mut path_map)
-                .unwrap_or_else(|(e_str, e_span)| abort!(e_span, e_str));
+            handle_additional_path(p_lit, &mut path_map);
         });
 
     let (path_arg, path_handler): (Vec<_>, Vec<_>) = macro_input
@@ -178,37 +173,26 @@ fn recursive_read(
     Ok(())
 }
 
-fn serve_paths(
-    target: LitStr,
-    span: Span2,
-    call_site: Span,
-) -> (HashSet<PathBuf>, (Vec<LitStr>, Vec<LitStr>)) {
-    // Canonicalize parent directory of current file
-    let target_dir = call_site
-        .local_file()
-        .unwrap_or_else(|| abort!(span, "Could not determine current file's path!"))
-        .canonicalize()
-        .unwrap_or_else(|e| {
-            abort!(
-                span,
-                format!("Failed to canonicalize path of current file: {e}")
-            )
-        })
-        .parent()
-        .unwrap_or_else(|| abort!(span, "Could not determine parent of current file!"))
-        .join(Path::new(&target.value()));
-    if target_dir.exists().not() {
+fn serve_paths(target: LitStr) -> (HashSet<PathBuf>, (Vec<LitStr>, Vec<LitStr>)) {
+    let span = target.span();
+    // Canonicalize parent directory of current crate
+    let crate_home = Path::new(
+        &env::var("CARGO_MANIFEST_DIR")
+            .unwrap_or_else(|e| abort!(span, format!("Failed to determine crate root: {e}"))),
+    )
+    .join(Path::new(&target.value()));
+    if crate_home.exists().not() {
         abort!(
             Span::call_site(),
-            format!("Requested directory {target_dir:?} does not exist!")
+            format!("Requested directory {crate_home:?} does not exist!")
         )
     }
 
     let mut path_map = Vec::new();
-    recursive_read(&target_dir, &target_dir, &mut path_map).unwrap_or_else(|e| {
+    recursive_read(&crate_home, &crate_home, &mut path_map).unwrap_or_else(|e| {
         abort!(
             Span::call_site(),
-            format!("Failed to read {target_dir:?}: {e}")
+            format!("Failed to read {crate_home:?}: {e}")
         )
     });
 
@@ -225,27 +209,22 @@ fn serve_paths(
     (path_set, (stripped_paths, absolute_paths))
 }
 
-fn handle_additional_path(
-    path_lit: &LitStr,
-    other_paths: &mut HashSet<PathBuf>,
-) -> Result<(), (String, Span2)> {
+fn handle_additional_path(path_lit: &LitStr, other_paths: &mut HashSet<PathBuf>) {
     let path_str = path_lit.value();
     if let Some('/') = path_str.chars().next() {
         // Splice the leading '/'
         let path = PathBuf::from(&path_str[1..]);
         if !other_paths.insert(path) {
-            Err((
-                format!("Multiple definitions of path '{}'!", path_lit.value()),
+            abort!(
                 path_lit.span(),
-            ))
-        } else {
-            Ok(())
+                format!("Multiple definitions of path '{}'!", path_lit.value())
+            )
         }
     } else {
-        Err((
-            format!("Path '{path_str}' is not prefixed with a '/'!"),
+        abort!(
             path_lit.span(),
-        ))
+            format!("Path '{path_str}' is not prefixed with a '/'!"),
+        )
     }
 }
 

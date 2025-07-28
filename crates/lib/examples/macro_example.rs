@@ -6,7 +6,7 @@ use tungstenite::WebSocket;
 
 fn main() -> JumpdriveResult {
     jumpdrive! {
-        dir = "../examples_public/",
+        dir = "public/",
         ws = ["/ws", websocket_handler],
         routes = {
             "/csv": csv_server
