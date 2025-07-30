@@ -2,7 +2,7 @@
     <h1><code>jumpdrive</code></h1>
 
 [<img alt="github" src="https://img.shields.io/badge/UBC--iGEM-jumpdrive-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="22">](https://github.com/UBC-iGEM/jumpdrive)
-[<img alt="docs" src="https://img.shields.io/github/deployments/UBC-iGEM/jumpdrive/production?&style=for-the-badge&labelColor=555555&logo=vercel" height="22">](https://jumpdrive.vercel.app/jumpdrive/)
+[<img alt="docs" src="https://img.shields.io/github/deployments/UBC-iGEM/jumpdrive/production?label=docs&style=for-the-badge&labelColor=555555&logo=vercel" height="22">](https://jumpdrive.vercel.app/jumpdrive/)
 
 </div>
 <div align="center">

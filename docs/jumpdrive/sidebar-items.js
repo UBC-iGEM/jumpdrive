@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["jumpdrive"],"struct":["Jumpdrive"],"type":["JumpdriveResult"]};
+window.SIDEBAR_ITEMS = {"enum":["Error"],"macro":["jumpdrive"],"mod":["prelude"],"struct":["Jumpdrive"],"type":["IoError","IoResult","JumpdriveResult"]};
