@@ -9,7 +9,7 @@ use std::{
         path::{Path, PathBuf},
 };
 use syn::{
-        Error, Ident, LitStr, braced, bracketed,
+        Error, Ident, LitStr, braced,
         parse::Parse,
         parse_macro_input,
         punctuated::Punctuated,
@@ -41,11 +41,9 @@ impl Parse for MacroInput {
                         let _: keywords::ws = input.parse()?;
                         let _: Eq = input.parse()?;
 
-                        let content;
-                        bracketed!(content in input);
-                        let socket: LitStr = content.parse()?;
-                        let _: Comma = content.parse()?;
-                        let socket_closure: Ident = content.parse()?;
+                        let socket: LitStr = input.parse()?;
+                        let _: Colon = input.parse()?;
+                        let socket_closure: Ident = input.parse()?;
 
                         let _: Comma = input.parse()?;
                         Some((socket, socket_closure))
@@ -97,12 +95,12 @@ impl Parse for PathItem {
 /// ## Example:
 /// ```rust
 /// jumpdrive! {
-///     dir = "public/",
-///     ws = ["/ws", ws_handler],
-///     routes = {
-///         "/csv": csv_server
-///     },
-///     err = err_callback
+///         dir = "public/",
+///         ws = "/ws": websocket_handler,
+///         routes = {
+///                 "/csv": csv_server
+///         },
+///         err = error_handler
 /// }
 /// ```
 /// ## Required fields:

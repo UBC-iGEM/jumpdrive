@@ -1,11 +1,14 @@
 use jumpdrive::prelude::*;
 
 fn main() -> JumpdriveResult {
-        ::jumpdrive::Jumpdrive::new(::phf::phf_map!{
-    "scripts/main.js" => (include_bytes!("/home/seb-hyland/Documents/jumpdrive/src/lib/public/scripts/main.js"),"application/javascript"),"index.html" => (include_bytes!("/home/seb-hyland/Documents/jumpdrive/src/lib/public/index.html"),"text/html")
-},Some(("/ws",websocket_handler)), ::phf::phf_map!{
-    "/csv" => csv_server
-},error_handler,).serve()
+        jumpdrive! {
+                dir = "public/",
+                ws = "/ws": websocket_handler,
+                routes = {
+                        "/csv": csv_server
+                },
+                err = error_handler
+        }
 }
 
 fn websocket_handler(ws: &mut Websocket) {
@@ -19,7 +22,7 @@ fn websocket_handler(ws: &mut Websocket) {
         }
 }
 fn csv_server(stream: &mut Stream) -> IoResult {
-        serve_file(stream, "crates/lib/examples/file.csv", ContentType::Text(ContentTypeText::Plain))
+        serve_file(stream, "src/lib/examples/file.csv", ContentType::Text(ContentTypeText::Plain))
 }
 fn error_handler(e: Error) {
         println!("MAJOR OOPSIES: {e}");

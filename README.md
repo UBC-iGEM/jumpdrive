@@ -23,12 +23,12 @@ Jumpdrive is a slim, minimally-featured library to statically serve a directory 
 Jumpdrive executes its event loop via the titular [`jumpdrive!`](https://ubcigem.com/jumpdrive/jumpdrive/macro.jumpdrive.html) macro, and provides various helper functions to assist endpoint handlers.
 ```rust
 jumpdrive! {
-    dir = "public/",
-    ws = ["/ws", ws_handler],
-    routes = {
-        "/csv": csv_server
-    },
-    err = err_callback
+        dir = "public/",
+        ws = "/ws": websocket_handler,
+        routes = {
+                "/csv": csv_server
+        },
+        err = error_handler
 }
 ```
 
