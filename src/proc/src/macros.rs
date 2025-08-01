@@ -67,6 +67,10 @@ impl Parse for MacroInput {
                 let _: Eq = input.parse()?;
                 let error_handler: Ident = input.parse()?;
 
+                if input.peek(Comma) {
+                        let _: Comma = input.parse()?;
+                }
+
                 if input.is_empty() {
                         let output = MacroInput {
                                 map_dir,
