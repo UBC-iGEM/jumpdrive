@@ -15,7 +15,7 @@ pub mod prelude;
 
 /// The internal representation of a Jumpdrive process.\
 /// **Note**: this type should never be constructed directly.
-/// Instead, use the `jumpdrive!` macro.
+/// Instead, use the [`jumpdrive!`] macro.
 #[derive(Debug)]
 pub struct Jumpdrive {
         map: Map<&'static str, (&'static [u8], &'static str)>,
@@ -23,18 +23,18 @@ pub struct Jumpdrive {
         other_paths: Map<&'static str, CustomEndpoint>,
         error_handler: ErrorHandler,
 }
-/// An alias for `std::io::Error`
+/// An alias for [`std::io::Error`]
 pub type IoError = io::Error;
-/// An alias for `Result<(), std::io::Error>`
+/// An alias for `Result<(), E>` where `E` is [`std::io::Error`]
 pub type IoResult = io::Result<()>;
 
 type Socket = (&'static str, fn(&mut WebSocket<TcpStream>));
 type CustomEndpoint = fn(&mut TcpStream) -> io::Result<()>;
 type ErrorHandler = fn(Error);
 
-/// A specialized Result type for the `jumpdrive!` macro.
+/// A specialized Result type for the [`jumpdrive!`] macro.
 /// # Returns
-/// - Err if binding to a TcpListener fails on the requested IP and PORT
+/// - Err if binding to a [`TcpListener`] fails on the requested IP and PORT
 /// - Should never realistically return otherwise
 pub type JumpdriveResult = io::Result<()>;
 

@@ -15,7 +15,7 @@
 <a href=#15 id=15 data-nosnippet>15</a>
 <a href=#16 id=16 data-nosnippet>16</a><span class="doccomment">/// The internal representation of a Jumpdrive process.\
 <a href=#17 id=17 data-nosnippet>17</a>/// **Note**: this type should never be constructed directly.
-<a href=#18 id=18 data-nosnippet>18</a>/// Instead, use the `jumpdrive!` macro.
+<a href=#18 id=18 data-nosnippet>18</a>/// Instead, use the [`jumpdrive!`] macro.
 <a href=#19 id=19 data-nosnippet>19</a></span><span class="attr">#[derive(Debug)]
 <a href=#20 id=20 data-nosnippet>20</a></span><span class="kw">pub struct </span>Jumpdrive {
 <a href=#21 id=21 data-nosnippet>21</a>        map: Map&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, (<span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8], <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str)&gt;,
@@ -23,18 +23,18 @@
 <a href=#23 id=23 data-nosnippet>23</a>        other_paths: Map&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, CustomEndpoint&gt;,
 <a href=#24 id=24 data-nosnippet>24</a>        error_handler: ErrorHandler,
 <a href=#25 id=25 data-nosnippet>25</a>}
-<a href=#26 id=26 data-nosnippet>26</a><span class="doccomment">/// An alias for `std::io::Error`
+<a href=#26 id=26 data-nosnippet>26</a><span class="doccomment">/// An alias for [`std::io::Error`]
 <a href=#27 id=27 data-nosnippet>27</a></span><span class="kw">pub type </span>IoError = io::Error;
-<a href=#28 id=28 data-nosnippet>28</a><span class="doccomment">/// An alias for `Result&lt;(), std::io::Error&gt;`
+<a href=#28 id=28 data-nosnippet>28</a><span class="doccomment">/// An alias for `Result&lt;(), E&gt;` where `E` is [`std::io::Error`]
 <a href=#29 id=29 data-nosnippet>29</a></span><span class="kw">pub type </span>IoResult = io::Result&lt;()&gt;;
 <a href=#30 id=30 data-nosnippet>30</a>
 <a href=#31 id=31 data-nosnippet>31</a><span class="kw">type </span>Socket = (<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, <span class="kw">fn</span>(<span class="kw-2">&amp;mut </span>WebSocket&lt;TcpStream&gt;));
 <a href=#32 id=32 data-nosnippet>32</a><span class="kw">type </span>CustomEndpoint = <span class="kw">fn</span>(<span class="kw-2">&amp;mut </span>TcpStream) -&gt; io::Result&lt;()&gt;;
 <a href=#33 id=33 data-nosnippet>33</a><span class="kw">type </span>ErrorHandler = <span class="kw">fn</span>(Error);
 <a href=#34 id=34 data-nosnippet>34</a>
-<a href=#35 id=35 data-nosnippet>35</a><span class="doccomment">/// A specialized Result type for the `jumpdrive!` macro.
+<a href=#35 id=35 data-nosnippet>35</a><span class="doccomment">/// A specialized Result type for the [`jumpdrive!`] macro.
 <a href=#36 id=36 data-nosnippet>36</a>/// # Returns
-<a href=#37 id=37 data-nosnippet>37</a>/// - Err if binding to a TcpListener fails on the requested IP and PORT
+<a href=#37 id=37 data-nosnippet>37</a>/// - Err if binding to a [`TcpListener`] fails on the requested IP and PORT
 <a href=#38 id=38 data-nosnippet>38</a>/// - Should never realistically return otherwise
 <a href=#39 id=39 data-nosnippet>39</a></span><span class="kw">pub type </span>JumpdriveResult = io::Result&lt;()&gt;;
 <a href=#40 id=40 data-nosnippet>40</a>
