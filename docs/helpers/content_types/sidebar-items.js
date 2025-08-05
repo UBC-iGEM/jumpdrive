@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["ContentType","ContentTypeApplication","ContentTypeImage","ContentTypeText"]};

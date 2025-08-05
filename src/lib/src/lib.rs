@@ -133,19 +133,19 @@ impl Jumpdrive {
 /// A specialized Error type to represent failures during server execution
 #[derive(Debug)]
 pub enum Error {
-        // Failed to connect to an incoming client
+        /// Failed to connect to an incoming client
         ClientConnectionFailure(IoError),
-        // Failed to read a client's request
+        /// Failed to read a client's request
         RequestReadFailure(IoError),
-        // Empty client request
+        /// Empty client request
         EmptyRequestError,
-        // Malformed client request
+        /// Malformed client request
         MalformedRequestError,
-        // Failed Websocket handshake
+        /// Failed Websocket handshake
         WebsocketHandshakeError(Box<HandshakeFailure>),
-        // Failed while serving a custom endpoint
+        /// Failed while serving a custom endpoint
         ServeFailure(IoError),
-        // Couldn't find a matching endpoint 😕
+        /// Couldn't find a matching endpoint 😕
         ConfusedMonkey(String),
 }
 type HandshakeFailure = HandshakeError<ServerHandshake<TcpStream, NoCallback>>;

@@ -5,6 +5,6 @@ set -eu pipefail
 # chmod +x src/build/build_doc.sh && src/build/build_doc.sh
 cargo clean --doc
 rm -rf docs/
-cargo doc --no-deps
+cargo doc --no-deps --package jumpdrive
 cp -r target/doc/ docs/
 cp src/build/redirect.html docs/index.html

@@ -133,19 +133,19 @@
 <a href=#133 id=133 data-nosnippet>133</a><span class="doccomment">/// A specialized Error type to represent failures during server execution
 <a href=#134 id=134 data-nosnippet>134</a></span><span class="attr">#[derive(Debug)]
 <a href=#135 id=135 data-nosnippet>135</a></span><span class="kw">pub enum </span>Error {
-<a href=#136 id=136 data-nosnippet>136</a>        <span class="comment">// Failed to connect to an incoming client
+<a href=#136 id=136 data-nosnippet>136</a>        <span class="doccomment">/// Failed to connect to an incoming client
 <a href=#137 id=137 data-nosnippet>137</a>        </span>ClientConnectionFailure(IoError),
-<a href=#138 id=138 data-nosnippet>138</a>        <span class="comment">// Failed to read a client's request
+<a href=#138 id=138 data-nosnippet>138</a>        <span class="doccomment">/// Failed to read a client's request
 <a href=#139 id=139 data-nosnippet>139</a>        </span>RequestReadFailure(IoError),
-<a href=#140 id=140 data-nosnippet>140</a>        <span class="comment">// Empty client request
+<a href=#140 id=140 data-nosnippet>140</a>        <span class="doccomment">/// Empty client request
 <a href=#141 id=141 data-nosnippet>141</a>        </span>EmptyRequestError,
-<a href=#142 id=142 data-nosnippet>142</a>        <span class="comment">// Malformed client request
+<a href=#142 id=142 data-nosnippet>142</a>        <span class="doccomment">/// Malformed client request
 <a href=#143 id=143 data-nosnippet>143</a>        </span>MalformedRequestError,
-<a href=#144 id=144 data-nosnippet>144</a>        <span class="comment">// Failed Websocket handshake
+<a href=#144 id=144 data-nosnippet>144</a>        <span class="doccomment">/// Failed Websocket handshake
 <a href=#145 id=145 data-nosnippet>145</a>        </span>WebsocketHandshakeError(Box&lt;HandshakeFailure&gt;),
-<a href=#146 id=146 data-nosnippet>146</a>        <span class="comment">// Failed while serving a custom endpoint
+<a href=#146 id=146 data-nosnippet>146</a>        <span class="doccomment">/// Failed while serving a custom endpoint
 <a href=#147 id=147 data-nosnippet>147</a>        </span>ServeFailure(IoError),
-<a href=#148 id=148 data-nosnippet>148</a>        <span class="comment">// Couldn't find a matching endpoint 😕
+<a href=#148 id=148 data-nosnippet>148</a>        <span class="doccomment">/// Couldn't find a matching endpoint 😕
 <a href=#149 id=149 data-nosnippet>149</a>        </span>ConfusedMonkey(String),
 <a href=#150 id=150 data-nosnippet>150</a>}
 <a href=#151 id=151 data-nosnippet>151</a><span class="kw">type </span>HandshakeFailure = HandshakeError&lt;ServerHandshake&lt;TcpStream, NoCallback&gt;&gt;;
