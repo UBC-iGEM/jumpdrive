@@ -1,5 +1,5 @@
 (function() {
-    var implementors = Object.fromEntries([["jumpdrive",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.88.0/core/marker/trait.Sync.html\" title=\"trait core::marker::Sync\">Sync</a> for <a class=\"enum\" href=\"jumpdrive/enum.Error.html\" title=\"enum jumpdrive::Error\">Error</a>",1,["jumpdrive::Error"]],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.88.0/core/marker/trait.Sync.html\" title=\"trait core::marker::Sync\">Sync</a> for <a class=\"struct\" href=\"jumpdrive/struct.Jumpdrive.html\" title=\"struct jumpdrive::Jumpdrive\">Jumpdrive</a>",1,["jumpdrive::Jumpdrive"]]]]]);
+    var implementors = Object.fromEntries([["jumpdrive",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.89.0/core/marker/trait.Sync.html\" title=\"trait core::marker::Sync\">Sync</a> for <a class=\"enum\" href=\"jumpdrive/enum.Error.html\" title=\"enum jumpdrive::Error\">Error</a>",1,["jumpdrive::Error"]],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.89.0/core/marker/trait.Sync.html\" title=\"trait core::marker::Sync\">Sync</a> for <a class=\"struct\" href=\"jumpdrive/struct.Jumpdrive.html\" title=\"struct jumpdrive::Jumpdrive\">Jumpdrive</a>",1,["jumpdrive::Jumpdrive"]]]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {

@@ -1,5 +1,6 @@
 use crate::content_types::ContentType;
 use std::{
+        fmt::Display,
         fs,
         io::{self, Write},
         net::TcpStream,
@@ -8,14 +9,11 @@ use std::{
 pub mod content_types;
 
 /// Generates a response with a valid HTTP/1.1 header
-pub fn generate_response<I: ToString>(mime_type: I, content: &[u8]) -> Vec<u8> {
-        fn inner(ty: String, content: &[u8]) -> Vec<u8> {
-                let len = content.len();
-                let mut response = format!("HTTP/1.1 200 OK\r\nContent-Length: {len}\r\nContent-Type: {ty}\r\n\r\n").into_bytes();
-                response.extend_from_slice(content);
-                response
-        }
-        inner(mime_type.to_string(), content)
+pub fn generate_response<I: Display>(mime_type: I, content: &[u8]) -> Vec<u8> {
+        let len = content.len();
+        let mut response = format!("HTTP/1.1 200 OK\r\nContent-Length: {len}\r\nContent-Type: {mime_type}\r\n\r\n").into_bytes();
+        response.extend_from_slice(content);
+        response
 }
 
 /// Serves a file at runtime

@@ -25,5 +25,5 @@ fn csv_server(stream: &mut Stream) -> IoResult {
         serve_file(stream, "src/lib/examples/file.csv", ContentType::Text(ContentTypeText::Plain))
 }
 fn error_handler(e: Error) {
-        println!("MAJOR OOPSIES: {e}");
+        println!("OOPS: {e}");
 }
