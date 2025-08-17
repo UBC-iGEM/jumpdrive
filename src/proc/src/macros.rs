@@ -153,11 +153,11 @@ pub fn jumpdrive(input: TokenStream) -> TokenStream {
 
         quote! {
             ::jumpdrive::Jumpdrive::new(
-                ::jumpdrive::prelude::phf_map! {
+                ::phf::phf_map! {
                     #(#stripped_paths => (include_bytes!(#absolute_paths), #mime_type)),*
                 },
                 #socket_arg,
-                ::jumpdrive::prelude::phf_map! {
+                ::phf::phf_map! {
                     #(#path_arg => #path_handler),*
                 },
                 #error_handler,
