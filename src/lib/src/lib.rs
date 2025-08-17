@@ -25,8 +25,6 @@ pub struct Jumpdrive {
 }
 /// An alias for [`std::io::Error`]
 pub type IoError = io::Error;
-/// An alias for `Result<(), E>` where `E` is [`std::io::Error`]
-pub type IoResult = io::Result<()>;
 
 type Socket = (&'static str, fn(&mut WebSocket<TcpStream>));
 type CustomEndpoint = fn(&mut TcpStream) -> io::Result<()>;
@@ -60,6 +58,7 @@ impl Jumpdrive {
                 let port = env::var("PORT").unwrap_or("9999".to_string());
                 let addr = format!("{ip}:{port}");
                 let listener = TcpListener::bind(addr)?;
+                listener.set_nonblocking(true)?;
 
                 for connection in listener.incoming() {
                         let conn = match connection {

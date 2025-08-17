@@ -1,5 +1,5 @@
 (function() {
-    var implementors = Object.fromEntries([["jumpdrive",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.89.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"jumpdrive/enum.Error.html\" title=\"enum jumpdrive::Error\">Error</a>"]]]]);
+    var implementors = Object.fromEntries([["jumpdrive",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.88.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"jumpdrive/enum.Error.html\" title=\"enum jumpdrive::Error\">Error</a>"]]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {
