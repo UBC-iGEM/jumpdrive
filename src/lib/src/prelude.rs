@@ -4,6 +4,7 @@ pub use helpers::{
         content_types::{ContentType, ContentTypeApplication, ContentTypeImage, ContentTypeText},
         generate_response, serve_file,
 };
+pub use phf::phf_map;
 pub use proc::jumpdrive;
 /// An alias for `tungstenite::WebSocket<std::net::TcpStream>`
 pub type Websocket = tungstenite::WebSocket<std::net::TcpStream>;
