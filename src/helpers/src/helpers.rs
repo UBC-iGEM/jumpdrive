@@ -11,7 +11,8 @@ pub mod content_types;
 /// Generates a response with a valid HTTP/1.1 header
 pub fn generate_response<I: Display>(mime_type: I, content: &[u8]) -> Vec<u8> {
         let len = content.len();
-        let mut response = format!("HTTP/1.1 200 OK\r\nContent-Length: {len}\r\nContent-Type: {mime_type}\r\n\r\n").into_bytes();
+        let mut response =
+                format!("HTTP/1.1 200 OK\r\nContent-Length: {len}\r\nConnection: close\r\nContent-Type: {mime_type}\r\n\r\n").into_bytes();
         response.extend_from_slice(content);
         response
 }

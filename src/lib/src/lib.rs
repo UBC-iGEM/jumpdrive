@@ -5,7 +5,7 @@ pub use proc::jumpdrive;
 use std::{
         env, error,
         fmt::Display,
-        io::{self, Write},
+        io::{self, Read, Write},
         net::{TcpListener, TcpStream},
         sync::Arc,
         thread,
@@ -109,12 +109,11 @@ impl Jumpdrive {
                                                         if let Some((asset, content_type)) = config.map.get(&path[1..]) {
                                                                 let response = generate_response(content_type, asset);
                                                                 conn_clone.write_all(&response).map_err(Error::ServeFailure)?;
-                                                                return Ok(());
                                                         }
                                                         if let Some(callback) = config.other_paths.get(path) {
                                                                 callback(&mut conn_clone).map_err(Error::ServeFailure)?;
-                                                                return Ok(());
                                                         }
+                                                        clear_socket(&mut conn_clone);
                                                         Err(Error::ConfusedMonkey(path.to_string()))
                                                 }
                                         } else {
@@ -128,6 +127,11 @@ impl Jumpdrive {
                 }
                 Ok(())
         }
+}
+
+fn clear_socket(stream: &mut TcpStream) {
+        let mut buf = [0; 2048];
+        let _ = stream.read(&mut buf);
 }
 
 /// A specialized Error type to represent failures during server execution
