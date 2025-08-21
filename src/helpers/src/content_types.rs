@@ -10,6 +10,7 @@ pub enum ContentType {
 pub enum ContentTypeText {
         Html,
         Css,
+        Csv,
         Markdown,
         Plain,
 }
@@ -39,8 +40,9 @@ impl ContentType {
                         match extension.as_ref() {
                                 "html" | "htm" => Some(ContentType::Text(ContentTypeText::Html)),
                                 "css" => Some(ContentType::Text(ContentTypeText::Css)),
+                                "csv" => Some(ContentType::Text(ContentTypeText::Csv)),
                                 "md" => Some(ContentType::Text(ContentTypeText::Markdown)),
-                                "txt" | "log" | "csv" | "ini" | "cfg" | "conf" | "env" | "sh" | "bash" => {
+                                "txt" | "log" | "ini" | "cfg" | "conf" | "env" | "sh" | "bash" => {
                                         Some(ContentType::Text(ContentTypeText::Plain))
                                 }
                                 "js" => Some(ContentType::Application(ContentTypeApplication::Javascript)),
@@ -68,6 +70,7 @@ impl Display for ContentType {
                                 let suffix = match ty {
                                         ContentTypeText::Html => "html",
                                         ContentTypeText::Css => "css",
+                                        ContentTypeText::Csv => "csv",
                                         ContentTypeText::Markdown => "markdown",
                                         ContentTypeText::Plain => "plain",
                                 };

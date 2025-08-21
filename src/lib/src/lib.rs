@@ -59,7 +59,6 @@ impl Jumpdrive {
                 let port = env::var("PORT").unwrap_or("9999".to_string());
                 let addr = format!("{ip}:{port}");
                 let listener = TcpListener::bind(addr)?;
-                listener.set_nonblocking(true)?;
 
                 for connection in listener.incoming() {
                         let conn = match connection {
@@ -101,6 +100,7 @@ impl Jumpdrive {
                                                         if let Some((socket_path, socket_handler)) = config.socket
                                                                 && path == socket_path
                                                         {
+                                                                conn_clone.set_nonblocking(true).map_err(Error::DeblockFailure)?;
                                                                 let mut ws = accept(conn_clone)
                                                                         .map_err(|e| Error::WebsocketHandshakeError(Box::new(e)))?;
                                                                 socket_handler(&mut ws);
@@ -141,6 +141,8 @@ pub enum Error {
         EmptyRequestError,
         /// Malformed client request
         MalformedRequestError,
+        /// Failed to make stream nonblocking
+        DeblockFailure(IoError),
         /// Failed Websocket handshake
         WebsocketHandshakeError(Box<HandshakeFailure>),
         /// Failed while serving a custom endpoint
@@ -158,6 +160,7 @@ impl Display for Error {
                         Self::RequestReadFailure(e) => write!(f, "Failed to read a client's request: {e}"),
                         Self::EmptyRequestError => write!(f, "Empty client request"),
                         Self::MalformedRequestError => write!(f, "Malformed client request"),
+                        Self::DeblockFailure(e) => write!(f, "Failed to make stream nonblocking: {e}"),
                         Self::WebsocketHandshakeError(e) => write!(f, "Failed Websocket handshake: {e}"),
                         Self::ServeFailure(e) => write!(f, "Failed while serving a custom endpoint: {e}"),
                         Self::ConfusedMonkey(p) => write!(f, "Couldn't find a matching endpoint for path {p}"),
