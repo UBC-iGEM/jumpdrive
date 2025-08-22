@@ -1,5 +1,4 @@
 use helpers::generate_response;
-pub use phf;
 use phf::Map;
 pub use proc::jumpdrive;
 use std::{
