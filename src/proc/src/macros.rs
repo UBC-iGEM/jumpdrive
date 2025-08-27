@@ -5,9 +5,11 @@ use proc_macro2::Span;
 use quote::quote;
 use std::{
         collections::HashSet,
-        env, io,
+        env,
+        fmt::Write as _,
+        io,
         path::{Path, PathBuf},
-        process::Command,
+        process::{Command, Stdio},
 };
 use syn::{
         Error, Ident, LitStr, braced,
@@ -200,12 +202,16 @@ fn get_paths(target: LitStr) -> Result<ServePaths, syn::Error> {
         }
 
         if cfg!(feature = "tsc") {
-                let tsc_glob = format!("{}**.ts", target.display());
-                match Command::new("tsc").arg(&tsc_glob).status() {
+                // let tsc_glob = format!("{}**.ts", target.display());
+                match Command::new("tsc").stdout(Stdio::piped()).stderr(Stdio::piped()).output() {
                         Err(e) => return Err(syn::Error::new(span, format!("Failed to spawn tsc with err {e:?}"))),
-                        Ok(code) => {
-                                if !code.success() {
-                                        return Err(syn::Error::new(span, format!("tsc exited with non-zero exit code {code}")));
+                        Ok(output) => {
+                                if !output.status.success() {
+                                        let mut err_msg = String::from("Tsc failed!\nStdout:\n");
+                                        let _ = writeln!(err_msg, "{}", String::from_utf8_lossy(&output.stdout));
+                                        err_msg.push_str("Stderr:\n");
+                                        let _ = writeln!(err_msg, "{}", String::from_utf8_lossy(&output.stderr));
+                                        return Err(syn::Error::new(span, err_msg));
                                 }
                         }
                 }
