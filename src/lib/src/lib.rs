@@ -57,7 +57,8 @@ impl Jumpdrive {
                 let ip = env::var("IP").unwrap_or("127.0.0.1".to_string());
                 let port = env::var("PORT").unwrap_or("9999".to_string());
                 let addr = format!("{ip}:{port}");
-                let listener = TcpListener::bind(addr)?;
+                let listener = TcpListener::bind(&addr)?;
+                println!("INFO: Jumpdrive is listening on http://{addr}");
 
                 for connection in listener.incoming() {
                         let conn = match connection {
