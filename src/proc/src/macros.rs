@@ -6,7 +6,6 @@ use quote::quote;
 use std::{
         collections::HashSet,
         env, io,
-        ops::Not,
         path::{Path, PathBuf},
         process::Command,
 };
@@ -189,14 +188,27 @@ type ServePaths = (HashSet<PathBuf>, (Vec<LitStr>, Vec<LitStr>));
 fn get_paths(target: LitStr) -> Result<ServePaths, syn::Error> {
         let span = target.span();
         let target = Path::new(
-                &env::var("CARGO_MANIFEST_DIR").map_err(|e| syn::Error::new(span, format!("Failed to determine crate root: {e}")))?,
+                &env::var("CARGO_MANIFEST_DIR")
+                        .map_err(|e| syn::Error::new(span, format!("Failed to determine crate root with err {e:?}")))?,
         )
         .join(Path::new(&target.value()));
-        if target.exists().not() {
+        if !target.exists() {
                 return Err(syn::Error::new(
                         Span::call_site(),
                         format!("Requested directory {target:?} does not exist!"),
                 ));
+        }
+
+        if cfg!(feature = "tsc") {
+                let tsc_glob = format!("{}**.ts", target.display());
+                match Command::new("tsc").arg(&tsc_glob).status() {
+                        Err(e) => return Err(syn::Error::new(span, format!("Failed to spawn tsc with err {e:?}"))),
+                        Ok(code) => {
+                                if !code.success() {
+                                        return Err(syn::Error::new(span, format!("tsc exited with non-zero exit code {code}")));
+                                }
+                        }
+                }
         }
 
         let mut path_pairs = Vec::new();
@@ -209,9 +221,8 @@ fn get_paths(target: LitStr) -> Result<ServePaths, syn::Error> {
                 .build();
         walk.into_iter()
                 .try_for_each(|f| -> Result<(), io::Error> {
-                        let entry = f.map_err(|e| io::Error::other(format!("Failed to parse ignore file! {e}")))?;
+                        let entry = f.map_err(|e| io::Error::other(format!("Failed to parse ignore file! {e:?}")))?;
                         let abs_path = entry.path();
-                        println!("Found file {abs_path:?}");
                         // Skip TS files and directories
                         if let Some(ext) = abs_path.extension()
                                 && ext == "ts"
