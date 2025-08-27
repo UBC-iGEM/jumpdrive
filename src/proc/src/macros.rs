@@ -203,7 +203,12 @@ fn get_paths(target: LitStr) -> Result<ServePaths, syn::Error> {
 
         if cfg!(feature = "tsc") {
                 // let tsc_glob = format!("{}**.ts", target.display());
-                match Command::new("tsc").stdout(Stdio::piped()).stderr(Stdio::piped()).output() {
+                match Command::new("tsc")
+                        .stdout(Stdio::piped())
+                        .stderr(Stdio::piped())
+                        .current_dir(&target)
+                        .output()
+                {
                         Err(e) => return Err(syn::Error::new(span, format!("Failed to spawn tsc with err {e:?}"))),
                         Ok(output) => {
                                 if !output.status.success() {
