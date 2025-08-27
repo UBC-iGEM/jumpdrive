@@ -212,10 +212,13 @@ fn get_paths(target: LitStr) -> Result<ServePaths, syn::Error> {
                         Err(e) => return Err(syn::Error::new(span, format!("Failed to spawn tsc with err {e:?}"))),
                         Ok(output) => {
                                 if !output.status.success() {
-                                        let mut err_msg = String::from("Tsc failed!\nStdout:\n");
-                                        let _ = writeln!(err_msg, "{}", String::from_utf8_lossy(&output.stdout));
-                                        err_msg.push_str("Stderr:\n");
-                                        let _ = writeln!(err_msg, "{}", String::from_utf8_lossy(&output.stderr));
+                                        let mut err_msg = String::from("Tsc failed!\n");
+                                        if !output.stdout.is_empty() {
+                                                let _ = write!(err_msg, "Stdout:\n{}", String::from_utf8_lossy(&output.stdout));
+                                        }
+                                        if !output.stderr.is_empty() {
+                                                let _ = write!(err_msg, "Stderr:\n{}", String::from_utf8_lossy(&output.stderr));
+                                        }
                                         return Err(syn::Error::new(span, err_msg));
                                 }
                         }
