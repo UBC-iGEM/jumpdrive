@@ -8,3 +8,6 @@ proc = { path = "../proc" }
 helpers = { path = "../helpers" }
 phf = { version = "0.12.1", features = ["macros"] }
 tungstenite = "0.27.0"
+
+[features]
+tsc = ["proc/tsc"]
