@@ -1,12 +1,14 @@
 use helpers::content_types::ContentType;
-use proc_macro::{Span, TokenStream};
-use proc_macro_error::{abort, proc_macro_error};
+use ignore::WalkBuilder;
+use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::quote;
 use std::{
         collections::HashSet,
         env, io,
         ops::Not,
         path::{Path, PathBuf},
+        process::Command,
 };
 use syn::{
         Error, Ident, LitStr, braced,
@@ -118,30 +120,47 @@ impl Parse for PathItem {
 ///     - endpoints, and
 ///     - callback functions which execute when a `GET` request is made to their endpoint
 #[proc_macro]
-#[proc_macro_error]
 pub fn jumpdrive(input: TokenStream) -> TokenStream {
         let macro_input = parse_macro_input!(input as MacroInput);
-        let (mut path_map, (stripped_paths, absolute_paths)) = serve_paths(macro_input.map_dir);
-        let mime_type: Vec<_> = stripped_paths
+        let (mut path_map, (stripped_paths, absolute_paths)) = match get_paths(macro_input.map_dir) {
+                Ok(v) => v,
+                Err(e) => return e.into_compile_error().into(),
+        };
+        let mime_type = match stripped_paths
                 .iter()
-                .map(|v| {
-                        ContentType::from_endpoint(v.value())
-                                .unwrap_or_else(|| abort!(v.span(), format!("Could not resolve content type of file {}", v.value())))
-                                .to_string()
+                .map(|v| -> Result<String, TokenStream> {
+                        match ContentType::from_endpoint(v.value()) {
+                                Some(content_type) => Ok(content_type.to_string()),
+                                None => Err(
+                                        syn::Error::new(v.span(), format!("Could not resolve content type of file {}", v.value()))
+                                                .into_compile_error()
+                                                .into(),
+                                ),
+                        }
                 })
-                .collect();
+                .collect::<Result<Vec<_>, _>>()
+        {
+                Ok(paths) => paths,
+                Err(e) => return e,
+        };
 
-        if let Some((ref socket_path, _)) = macro_input.socket {
-                handle_additional_path(socket_path, &mut path_map);
+        if let Some((ref socket_path, _)) = macro_input.socket
+                && let Err(e) = handle_additional_path(socket_path, &mut path_map)
+        {
+                return e.into_compile_error().into();
         }
         let socket_arg = match macro_input.socket {
                 Some((socket_path, socket_handler)) => quote!(Some((#socket_path, #socket_handler))),
                 None => quote!(None),
         };
 
-        macro_input.other_paths.iter().for_each(|PathItem(p_lit, _)| {
-                handle_additional_path(p_lit, &mut path_map);
-        });
+        if let Err(e) = macro_input
+                .other_paths
+                .iter()
+                .try_for_each(|PathItem(p_lit, _)| handle_additional_path(p_lit, &mut path_map))
+        {
+                return e.into_compile_error().into();
+        }
 
         let (path_arg, path_handler): (Vec<_>, Vec<_>) = macro_input
                 .other_paths
@@ -166,39 +185,54 @@ pub fn jumpdrive(input: TokenStream) -> TokenStream {
         .into()
 }
 
-fn recursive_read(dir: &Path, original_path: &Path, path_pairs: &mut Vec<(PathBuf, PathBuf)>) -> io::Result<()> {
-        for entry in dir.read_dir()? {
-                let abs_path = entry?.path();
-                let stripped_path = abs_path.strip_prefix(original_path).map_err(|e| {
-                        io::Error::new(
-                                io::ErrorKind::InvalidFilename,
-                                format!("Prefix stripping failed with err {e}. This is a logical error!"),
-                        )
-                })?;
-                if abs_path.is_dir() {
-                        recursive_read(&abs_path, original_path, path_pairs)?;
-                } else {
-                        path_pairs.push((stripped_path.to_path_buf(), abs_path));
-                }
-        }
-        Ok(())
-}
-
-fn serve_paths(target: LitStr) -> (HashSet<PathBuf>, (Vec<LitStr>, Vec<LitStr>)) {
+type ServePaths = (HashSet<PathBuf>, (Vec<LitStr>, Vec<LitStr>));
+fn get_paths(target: LitStr) -> Result<ServePaths, syn::Error> {
         let span = target.span();
-        // Canonicalize parent directory of current crate
-        let crate_home =
-                Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|e| abort!(span, format!("Failed to determine crate root: {e}"))))
-                        .join(Path::new(&target.value()));
-        if crate_home.exists().not() {
-                abort!(Span::call_site(), format!("Requested directory {crate_home:?} does not exist!"))
+        let target = Path::new(
+                &env::var("CARGO_MANIFEST_DIR").map_err(|e| syn::Error::new(span, format!("Failed to determine crate root: {e}")))?,
+        )
+        .join(Path::new(&target.value()));
+        if target.exists().not() {
+                return Err(syn::Error::new(
+                        Span::call_site(),
+                        format!("Requested directory {target:?} does not exist!"),
+                ));
         }
 
-        let mut path_map = Vec::new();
-        recursive_read(&crate_home, &crate_home, &mut path_map)
-                .unwrap_or_else(|e| abort!(Span::call_site(), format!("Failed to read {crate_home:?}: {e}")));
+        let mut path_pairs = Vec::new();
+        let walk = WalkBuilder::new(&target)
+                .add_custom_ignore_filename(".jumpdriveignore")
+                .ignore(true)
+                .git_global(false)
+                .git_exclude(false)
+                .git_ignore(false)
+                .build();
+        walk.into_iter()
+                .try_for_each(|f| -> Result<(), io::Error> {
+                        let entry = f.map_err(|e| io::Error::other(format!("Failed to parse ignore file! {e}")))?;
+                        let abs_path = entry.path();
+                        println!("Found file {abs_path:?}");
+                        // Skip TS files and directories
+                        if let Some(ext) = abs_path.extension()
+                                && ext == "ts"
+                        {
+                                return Ok(());
+                        }
+                        if abs_path.is_dir() {
+                                return Ok(());
+                        }
+                        let stripped_path = abs_path.strip_prefix(&target).map_err(|e| {
+                                io::Error::new(
+                                        io::ErrorKind::InvalidFilename,
+                                        format!("Prefix stripping failed with err {e}. This is a logical error!"),
+                                )
+                        })?;
+                        path_pairs.push((stripped_path.to_path_buf(), abs_path.to_path_buf()));
+                        Ok(())
+                })
+                .map_err(|e| syn::Error::new(span, e))?;
 
-        let (stripped_paths, absolute_paths) = path_map
+        let (stripped_paths, absolute_paths) = path_pairs
                 .iter()
                 .map(|(stripped_path, absolute_path)| {
                         (
@@ -207,19 +241,27 @@ fn serve_paths(target: LitStr) -> (HashSet<PathBuf>, (Vec<LitStr>, Vec<LitStr>))
                         )
                 })
                 .collect();
-        let path_set: HashSet<_> = path_map.iter().map(|(p, _)| p.clone()).collect();
-        (path_set, (stripped_paths, absolute_paths))
+        let path_set: HashSet<_> = path_pairs.into_iter().map(|(p, _)| p).collect();
+        Ok((path_set, (stripped_paths, absolute_paths)))
 }
 
-fn handle_additional_path(path_lit: &LitStr, other_paths: &mut HashSet<PathBuf>) {
+fn handle_additional_path(path_lit: &LitStr, other_paths: &mut HashSet<PathBuf>) -> Result<(), syn::Error> {
         let path_str = path_lit.value();
         if let Some('/') = path_str.chars().next() {
                 // Splice the leading '/'
                 let path = PathBuf::from(&path_str[1..]);
                 if !other_paths.insert(path) {
-                        abort!(path_lit.span(), format!("Multiple definitions of path '{}'!", path_lit.value()))
+                        Err(syn::Error::new(
+                                path_lit.span(),
+                                format!("Multiple definitions of path '{}'!", path_lit.value()),
+                        ))
+                } else {
+                        Ok(())
                 }
         } else {
-                abort!(path_lit.span(), format!("Path '{path_str}' is not prefixed with a '/'!"),)
+                Err(syn::Error::new(
+                        path_lit.span(),
+                        format!("Path '{path_str}' is not prefixed with a '/'!"),
+                ))
         }
 }

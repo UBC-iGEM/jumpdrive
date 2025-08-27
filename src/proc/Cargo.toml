@@ -9,7 +9,7 @@ path = "src/macros.rs"
 
 [dependencies]
 helpers = { path = "../helpers" }
-proc-macro-error = "1.0.4"
+ignore = "0.4.23"
 proc-macro2 = "1.0.95"
 quote = "1.0.40"
 syn = "2.0.104"
