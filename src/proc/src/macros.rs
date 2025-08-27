@@ -229,7 +229,7 @@ fn get_paths(target: LitStr) -> Result<ServePaths, syn::Error> {
         let walk = WalkBuilder::new(&target)
                 .add_custom_ignore_filename(".jumpdriveignore")
                 .ignore(true)
-                .git_global(false)
+                .git_global(true)
                 .git_exclude(false)
                 .git_ignore(false)
                 .build();
@@ -237,9 +237,10 @@ fn get_paths(target: LitStr) -> Result<ServePaths, syn::Error> {
                 .try_for_each(|f| -> Result<(), io::Error> {
                         let entry = f.map_err(|e| io::Error::other(format!("Failed to parse ignore file! {e:?}")))?;
                         let abs_path = entry.path();
-                        // Skip TS files and directories
+                        // Skip TS files if tsc feature active
                         if let Some(ext) = abs_path.extension()
                                 && ext == "ts"
+                                && cfg!(feature = "tsc")
                         {
                                 return Ok(());
                         }
