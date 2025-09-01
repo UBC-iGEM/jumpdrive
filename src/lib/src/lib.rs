@@ -26,7 +26,7 @@ pub struct Jumpdrive {
 /// An alias for [`std::io::Error`]
 pub type IoError = io::Error;
 
-type Socket = (&'static str, fn(&mut WebSocket<TcpStream>));
+type Socket = (&'static str, fn(WebSocket<TcpStream>));
 type CustomEndpoint = fn(&mut TcpStream) -> io::Result<()>;
 type ErrorHandler = fn(Error);
 
@@ -101,9 +101,9 @@ impl Jumpdrive {
                                                                 && path == socket_path
                                                         {
                                                                 conn_clone.set_nonblocking(true).map_err(Error::DeblockFailure)?;
-                                                                let mut ws = accept(conn_clone)
+                                                                let ws = accept(conn_clone)
                                                                         .map_err(|e| Error::WebsocketHandshakeError(Box::new(e)))?;
-                                                                socket_handler(&mut ws);
+                                                                socket_handler(ws);
                                                                 return Ok(());
                                                         }
                                                         if let Some((asset, content_type)) = config.map.get(&path[1..]) {

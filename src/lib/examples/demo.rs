@@ -11,7 +11,7 @@ fn main() -> JumpdriveResult {
         }
 }
 
-fn websocket_handler(ws: &mut Websocket) {
+fn websocket_handler(mut ws: Websocket) {
         loop {
                 if let Ok(msg) = ws.read() {
                         println!("WS message read: {msg}");
