@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["ContentType","ContentTypeApplication","ContentTypeImage","ContentTypeText"],"fn":["generate_response","serve_file"],"macro":["jumpdrive","phf_map"],"type":["IoResult","Stream","Websocket"]};
